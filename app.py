@@ -90,7 +90,7 @@ def watch(video_id):
 def init_db():
     """Creates the database tables."""
     db.create_all()
-    print("✅ Database created successfully!")
+    print(" Database created successfully!")
 
 
 
