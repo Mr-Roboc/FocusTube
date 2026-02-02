@@ -32,7 +32,7 @@ def search_youtube(query):
     }
 
     try:
-        # FIX 1: Use keyword argument 'params='
+    
         response = requests.get(URL, params=params)
 
         if response.status_code == 200:
@@ -48,10 +48,9 @@ def search_youtube(query):
                 }
                 cleaned_videos.append(video_data)
             
-            # FIX 2: Return is OUTSIDE the loop (aligned with 'for')
             return cleaned_videos
 
-        # FIX 3: Else is aligned with 'if response...'
+        # FIX 
         else:
             print(f"Error: API returned {response.status_code}")
             return []
@@ -79,13 +78,11 @@ def search_query():
 
 @app.route('/watch/<video_id>')
 def watch(video_id):
-    # We only have the ID for now. 
-    # (Later, we can use the DB to look up the title using this ID
+    
     return render_template('watch.html',video_id = video_id)
 
 
-# COMMAND TO CREATE THE DATABASE
-# We create a custom command so we can initialize the DB from the terminal
+
 @app.cli.command("init-db")
 def init_db():
     """Creates the database tables."""
