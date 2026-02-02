@@ -10,7 +10,7 @@ def get_youtube_videos(query):
         'key': API_KEY,
         'q': query,
         'part': 'snippet', # asking for title, desc, etc.
-        'type': 'video',     # TODO: What type are we looking for? (video/channel/playlist)
+        'type': 'video',     
         'maxResults': 5
     }
     response = requests.get(BASE_URL,params=params)
@@ -21,17 +21,7 @@ def get_youtube_videos(query):
     
         data  = response.json()
 
-        # 5. PARSE THE DATA (The Tricky Part!)
-        # YouTube returns a dictionary. The list of videos is inside a key called 'items'.
-        # Write a loop here to go through each video in data['items']
         
-        # HINT: The structure looks like this:
-        # {
-        #    "items": [
-        #       { "id": { "videoId": "123" }, "snippet": { "title": "Math 101" } },
-        #       { ... next video ... }
-        #    ]
-        # }
         
         print(f"--- Results for '{query}' ---")
         
