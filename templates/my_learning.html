@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>My learning — FocusTube</title><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></head>
+<body>
+    <main class="shell">
+        <nav class="topbar"><a class="brand" href="/"><span class="brand-mark">F</span> FocusTube</a><div class="account-nav"><span class="topbar-note">{{ logged_in_user.display_name if logged_in_user else 'This device' }}</span>{% if logged_in_user %}<form action="/logout" method="post"><button class="logout-button" type="submit">Log out</button></form>{% endif %}</div></nav>
+        <section class="learning-hero"><p class="eyebrow">{{ logged_in_user.display_name.upper() if logged_in_user else 'YOUR DEVICE' }}’S PATH</p><h1>My learning</h1><p>Keep the lessons that matter. Return when you’re ready.</p></section>
+        {% if not logged_in_user %}<div class="notice account-notice">You’re tracking learning on this device. <a href="/signup">Create an account</a> to keep it across devices.</div>{% endif %}
+        <section class="section learning-section"><div class="section-heading"><div><p class="eyebrow">SAVED & IN PROGRESS</p><h2>Your lessons</h2></div><a class="back-home" href="/">Find another lesson →</a></div>{% if queue %}<div class="learning-grid">{% for item in queue %}<a class="learning-card" href="/watch/{{ item.video.youtube_id }}"><div class="learning-thumb">{% if item.video.thumbnail %}<img src="{{ item.video.thumbnail }}" alt="">{% endif %}<span class="thumb-progress" style="width: {{ item.progress_percent }}%"></span></div><div class="learning-card-copy"><span class="card-meta">{{ 'COMPLETED' if item.completed else ('IN PROGRESS' if item.progress_percent else 'SAVED') }}</span><h3>{{ item.video.title }}</h3><p>{{ item.progress_percent }}% watched</p></div><span class="arrow">→</span></a>{% endfor %}</div>{% else %}<div class="empty-state"><span class="empty-icon">♡</span><h3>Your learning path is empty</h3><p>Star a lesson while searching and it will show up here.</p><a class="start-link inline-link" href="/">Explore lessons →</a></div>{% endif %}</section>
+        {% if notes %}<section class="section learning-section notes-summary"><div class="section-heading"><div><p class="eyebrow">RECENT NOTES</p><h2>Ideas you kept</h2></div></div><div class="saved-notes">{% for note in notes %}<a href="/watch/{{ note.video.youtube_id }}" class="saved-note"><span class="card-meta">{{ note.video.title }}</span><p>{{ note.content }}</p><span class="note-date">{{ note.created_at.strftime('%b %d, %Y') }}</span></a>{% endfor %}</div></section>{% endif %}
+        <footer><span>FocusTube</span><span>Built for learning, not scrolling · {{ current_year }}</span></footer>
+    </main>
+</body>
+</html>

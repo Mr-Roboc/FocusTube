@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{ 'Create account' if mode == 'signup' else 'Log in' }} — FocusTube</title><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></head>
+<body>
+    <main class="auth-shell">
+        <a class="brand" href="/"><span class="brand-mark">F</span> FocusTube</a>
+        <section class="auth-card">
+            <p class="eyebrow">{{ 'START YOUR PATH' if mode == 'signup' else 'WELCOME BACK' }}</p>
+            <h1>{{ 'Create your learning account' if mode == 'signup' else 'Continue learning' }}</h1>
+            <p class="auth-copy">{{ 'Save lessons, notes, and progress across sessions.' if mode == 'signup' else 'Pick up your saved lessons and notes where you left them.' }}</p>
+            {% if error %}<div class="notice error" role="alert">{{ error }}</div>{% endif %}
+            <form class="auth-form" method="post">
+                {% if mode == 'signup' %}<label>Name<input name="display_name" autocomplete="name" required></label>{% endif %}
+                <label>Email<input type="email" name="email" autocomplete="email" required></label>
+                <label>Password<input type="password" name="password" minlength="8" autocomplete="{{ 'new-password' if mode == 'signup' else 'current-password' }}" required></label>
+                <button type="submit">{{ 'Create account' if mode == 'signup' else 'Log in' }} <span>→</span></button>
+            </form>
+            <p class="auth-switch">{% if mode == 'signup' %}Already have an account? <a href="/login">Log in</a>{% else %}New to FocusTube? <a href="/signup">Create an account</a>{% endif %}</p>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,55 +1,119 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Home Page</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f5f1">
+    <title>FocusTube — learn with intent</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="bg-light">
-
-    <div class="container mt-5">
-        <div class="text-center mb-5">
-            <h1 class="display-4 fw-bold">FocusTube</h1>
-            <p class="lead text-muted">Distraction-free learning. Powered by AI.</p>
-        </div>
-
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <form action="/search" method="POST" class="d-flex gap-2">
-                    <input type="text" name="query" class="form-control form-control-lg" placeholder="What do you want to learn today? (e.g. 'Pythagoras Theorem')" required>
-                    <button type="submit" class="btn btn-primary btn-lg">Search</button>
-                </form>
+<body>
+    <main class="shell">
+        <nav class="topbar">
+            <a class="brand" href="/" aria-label="FocusTube home"><span class="brand-mark">F</span> FocusTube</a>
+            <div class="account-nav">
+                {% if logged_in_user %}
+                <a class="topbar-note" href="/my-learning">My learning</a>
+                <form action="/logout" method="post"><button class="logout-button" type="submit">Log out</button></form>
+                {% else %}
+                <a class="topbar-note" href="/login">Log in</a><a class="signup-link" href="/signup">Create account</a>
+                {% endif %}
             </div>
-        </div>
+        </nav>
 
-        <div class="mt-5">
-        {% if videos %}
-        <h3 class="mb-4">Top Results</h3>
-        <div class="row">
-            {% for video in videos %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <img src="{{ video.thumbnail }}" class="card-img-top" alt="Thumbnail">
-                    
-                    <div class="card-body">
-                        <h5 class="card-title text-truncate">{{ video.title }}</h5>
-                        <p class="card-text small text-muted">
-                            {{ video.description[:100] }}...
-                        </p>
-                        
-                        <a href="/watch/{{ video.video_id }}" class="btn btn-primary w-100">
-                            Start Learning
-                        </a>
-                    </div>
+        <section class="hero">
+            <p class="eyebrow">LESS NOISE. MORE PROGRESS.</p>
+            <h1>What do you want<br><em>to learn today?</em></h1>
+            <p class="hero-copy">Search for a topic. We find the lessons worth your attention.</p>
+            <form action="/search" method="post" class="search-form">
+                <label class="sr-only" for="query">Topic to learn</label>
+                <input id="query" name="query" value="{{ query|default('', true) }}" placeholder="Try “calculus”, “photography”, or “Python”" autocomplete="off" required>
+                <button type="submit">Find lessons <span aria-hidden="true">↗</span></button>
+            </form>
+            <div class="promise"><span class="spark">✦</span> Educational results, filtered for focus</div>
+        </section>
+
+        {% if error %}
+        <div class="notice error" role="alert">{{ error }}</div>
+        {% endif %}
+
+        {% if queue %}
+        <section class="section queue-section">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">YOUR LEARNING PATH</p>
+                    <h2>Continue where you left off</h2>
                 </div>
+                <span class="section-count">{{ queue|length }} lesson{{ '' if queue|length == 1 else 's' }}</span>
             </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-</div>
-    </div>
+            <div class="queue-list">
+                {% for item in queue %}
+                <a class="queue-item" href="/watch/{{ item.video.youtube_id }}">
+                    <div class="queue-thumb">
+                        {% if item.video.thumbnail %}<img src="{{ item.video.thumbnail }}" alt="">{% else %}<span>F</span>{% endif %}
+                        {% if item.progress_percent %}<span class="thumb-progress" style="width: {{ item.progress_percent }}%"></span>{% endif %}
+                    </div>
+                    <div class="queue-copy">
+                        <strong>{{ item.video.title }}</strong>
+                        <span>{{ 'Completed' if item.completed else (item.progress_percent|string + '% watched' if item.progress_percent else 'Saved for later') }}</span>
+                    </div>
+                    <span class="arrow" aria-hidden="true">→</span>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
 
+        {% if videos is defined %}
+        <section class="section results-section">
+            <div class="section-heading results-heading">
+                <div>
+                    <p class="eyebrow">RESULTS FOR “{{ query }}”</p>
+                    <h2>Lessons worth your time</h2>
+                </div>
+                <span class="filter-pill"><span>✦</span> {{ 'AI filtered' if filter_mode == 'ai' else 'Smart filtered' }}</span>
+            </div>
+
+            {% if videos %}
+            <div class="video-grid">
+                {% for video in videos %}
+                <article class="video-card">
+                    <a class="card-image" href="/watch/{{ video.video_id }}">
+                        <img src="{{ video.thumbnail }}" alt="{{ video.title }} thumbnail" loading="lazy">
+                        {% if video.progress_percent %}<span class="card-progress" style="width: {{ video.progress_percent }}%"></span>{% endif %}
+                    </a>
+                    <div class="card-body">
+                        <div class="card-meta">{{ video.channel_title or 'YouTube lesson' }} <span>·</span> {{ video.ai_reason }}</div>
+                        <h3><a href="/watch/{{ video.video_id }}">{{ video.title }}</a></h3>
+                        <p>{{ video.description|truncate(130, True, '…') }}</p>
+                        <div class="card-actions">
+                            <a class="start-link" href="/watch/{{ video.video_id }}">{{ 'Continue' if video.progress_percent else 'Start learning' }} <span>→</span></a>
+                            <button class="save-button {{ 'is-saved' if video.saved else '' }}" type="button" data-video-id="{{ video.video_id }}" data-saved="{{ 'true' if video.saved else 'false' }}" data-title="{{ video.title|e }}" data-thumbnail="{{ video.thumbnail|e }}" aria-label="{{ 'Remove from saved lessons' if video.saved else 'Save lesson' }}">
+                                <span aria-hidden="true">{{ '♥' if video.saved else '♡' }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state"><span class="empty-icon">⌁</span><h3>No focused lessons found</h3><p>Try a broader topic or a different phrase.</p></div>
+            {% endif %}
+        </section>
+        {% else %}
+        <section class="section how-section">
+            <div class="section-heading"><div><p class="eyebrow">HOW IT WORKS</p><h2>A simple loop for deep work</h2></div></div>
+            <div class="principles">
+                <div><span>01</span><h3>Search with intent</h3><p>Tell us the skill or idea you want to understand.</p></div>
+                <div><span>02</span><h3>Choose a lesson</h3><p>AI helps remove entertainment and surface useful teaching.</p></div>
+                <div><span>03</span><h3>Keep your momentum</h3><p>Your place is saved automatically for the next session.</p></div>
+            </div>
+        </section>
+        {% endif %}
+
+        <footer><span>FocusTube</span><span>Built for learning, not scrolling · {{ current_year }}</span></footer>
+    </main>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
